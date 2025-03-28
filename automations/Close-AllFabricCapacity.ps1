@@ -32,17 +32,17 @@ az account set --subscription $SubscriptionId
 # get list of all Fabric Capacities in the subscription
 $capacities = az fabric capacity list | ConvertFrom-Json
 
-Write-Host "Found $($capacities.Count) Fabric Capacities in subscription $SubscriptionId."
+"Found $($capacities.Count) Fabric Capacities in subscription $SubscriptionId."
 foreach ($capacity in $capacities) {
     $capacityName = $capacity.name
     $capacityRG = $capacity.resourceGroup
     $capacitystate = $capacity.state
-    Write-Host "Fabric Capacity: $capacityName in resource group $capacityRG is in state $capacitystate."
+    "Fabric Capacity: $capacityName in resource group $capacityRG is in state $capacitystate."
     if ($capacitystate -eq "Active") {
-        Write-Host "Pausing Fabric Capacity: $capacityName..."
+        "Pausing Fabric Capacity: $capacityName..."
         az fabric capacity suspend --capacity-name $capacityName --resource-group $capacityRG
-        Write-Host "Fabric Capacity: $capacityName has been paused."
+        "Fabric Capacity: $capacityName has been paused."
     } else {
-        Write-Host "Fabric Capacity: $capacityName is already in a non-running state. Skipping..."
+        "Fabric Capacity: $capacityName is already in a non-running state. Skipping..."
     }
 }
