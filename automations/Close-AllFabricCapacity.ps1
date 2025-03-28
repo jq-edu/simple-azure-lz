@@ -1,0 +1,48 @@
+<#
+.SYNOPSIS
+This script is designed to shut down all Fabric Capacities in a development subscription.
+
+.DESCRIPTION
+The script iterates through all Fabric Capacities within a specified development subscription and performs a pause operation on each unit. This is useful for managing resources and reducing costs in a development environment when the Fabric Units are not in use.
+
+.PARAMETER SubscriptionId
+The ID of the Azure subscription where the Fabric Units are located.
+
+.NOTES
+- Ensure you have the necessary permissions to manage Fabric Units in the subscription.
+- Verify the subscription ID and environment before running the script to avoid unintended shutdowns.
+
+#>
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$SubscriptionId
+)
+
+if (-not $env:AZUREPS_HOST_ENVIRONMENT) {
+    "Running Locally (Interactively)"
+    az login
+} else {
+    "Running in Azure Automation"
+    az login --identity
+}
+
+# Set the subscription context to the specified subscription ID
+az account set --subscription $SubscriptionId
+
+# get list of all Fabric Capacities in the subscription
+$capacities = az fabric capacity list | ConvertFrom-Json
+
+Write-Host "Found $($capacities.Count) Fabric Capacities in subscription $SubscriptionId."
+foreach ($capacity in $capacities) {
+    $capacityName = $capacity.name
+    $capacityRG = $capacity.resourceGroup
+    $capacitystate = $capacity.state
+    Write-Host "Fabric Capacity: $capacityName in resource group $capacityRG is in state $capacitystate."
+    if ($capacitystate -eq "Active") {
+        Write-Host "Pausing Fabric Capacity: $capacityName..."
+        az fabric capacity suspend --capacity-name $capacityName --resource-group $capacityRG
+        Write-Host "Fabric Capacity: $capacityName has been paused."
+    } else {
+        Write-Host "Fabric Capacity: $capacityName is already in a non-running state. Skipping..."
+    }
+}
