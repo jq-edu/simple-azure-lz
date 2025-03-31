@@ -29,6 +29,9 @@ if (-not $env:AZUREPS_HOST_ENVIRONMENT) {
 # Set the subscription context to the specified subscription ID
 az account set --subscription $SubscriptionId
 
+# Make sure the Fabric az extention is loaded
+az extension add --name microsoft-fabric --upgrade --yes
+
 # get list of all Fabric Capacities in the subscription
 $capacities = az fabric capacity list | ConvertFrom-Json
 
