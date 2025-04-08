@@ -30,9 +30,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.19.0' = {
   scope: rg
   name: 'deploy-${storageAccountName}'
   params: {
-    // Required parameters
     name: storageAccountName
-    // Non-required parameters
     allowBlobPublicAccess: false
     networkAcls: {
       bypass: 'AzureServices'
@@ -56,11 +54,10 @@ module serverfarm 'br/public:avm/res/web/serverfarm:0.4.1' = {
   }
 }
 
-module site 'br/public:avm/res/web/site:0.15.1' = {
+module functionApp 'br/public:avm/res/web/site:0.15.1' = {
   scope: rg
   name: 'deploy-${functionAppName}'
   params: {
-    // Required parameters
     name: functionAppName
     kind: 'functionapp'
     serverFarmResourceId: serverfarm.outputs.resourceId
