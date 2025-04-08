@@ -20,6 +20,8 @@ var rgName = 'rg-${spokeName}-${env}'
 var storageAccountName = 'st${replace(spokeName, '-', '')}${env}'
 var appServicePlanName = 'asp-${spokeName}-${env}'
 var functionAppName = 'fct-${spokeName}-${env}'
+var logAnalyticsWorkspaceName = 'log-${spokeName}-${env}'
+var appInsightsName = 'appi-${spokeName}-${env}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2021-01-01' = {
   name: rgName
@@ -40,6 +42,25 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.19.0' = {
     kind: storageConfig.kind
     supportsHttpsTrafficOnly: storageConfig.supportsHttpsTrafficOnly
     minimumTlsVersion: storageConfig.minimumTlsVersion
+  }
+}
+
+module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.11.1' = {
+  scope: rg
+  name: 'deploy-${logAnalyticsWorkspaceName}'
+  params: {
+    name: logAnalyticsWorkspaceName
+    location: location
+  }
+}
+
+module appInsight 'br/public:avm/res/insights/component:0.6.0' = {
+  scope: rg
+  name: 'deploy-${appInsightsName}'
+  params: {
+    name: appInsightsName
+    workspaceResourceId: logAnalyticsWorkspace.outputs.resourceId
+    location: location
   }
 }
 
@@ -75,6 +96,7 @@ module functionApp 'br/public:avm/res/web/site:0.15.1' = {
         name: 'scm'
       }
     ]
+    appInsightResourceId: appInsight.outputs.resourceId
     storageAccountResourceId: storageAccount.outputs.resourceId
   }
 }
